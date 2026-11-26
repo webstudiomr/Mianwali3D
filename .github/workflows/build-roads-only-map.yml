@@ -1,0 +1,55 @@
+name: Build Mianwali roads-only map
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  build-road-map:
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Install map tools
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y osmium-tool blender
+          python -m pip install --upgrade pip
+          python -m pip install osmium
+
+      - name: Download Pakistan OpenStreetMap extract
+        run: |
+          mkdir -p data
+          curl -L --fail --retry 3 \
+            https://download.geofabrik.de/asia/pakistan-latest.osm.pbf \
+            -o data/pakistan-261125.osm.pbf
+
+      - name: Extract selected roads
+        run: python scripts/extract_roads.py
+
+      - name: Render 2D road preview
+        run: python scripts/render_roads_preview.py
+
+      - name: Build Blender road scene
+        run: blender --background --python scripts/import_roads_to_blender.py
+
+      - name: Package map assets
+        run: |
+          mkdir -p road-map-build
+          cp data/mianwali_roads_only.geojson road-map-build/
+          cp exports/mianwali_roads_only_preview.svg road-map-build/
+          cp blender/mianwali_roads_only.blend road-map-build/
+          cd road-map-build
+          zip -r ../mianwali-roads-only-map.zip .
+
+      - name: Upload generated map
+        uses: actions/upload-artifact@v4
+        with:
+          name: mianwali-roads-only-map
+          path: mianwali-roads-only-map.zip
+          if-no-files-found: error
+          retention-days: 30
