@@ -1,0 +1,38 @@
+{
+  "project": "Mianwali3D roads-only map",
+  "source_pbf": "data/pakistan-261125.osm.pbf",
+  "output_geojson": "data/mianwali_roads_only.geojson",
+  "preview_svg": "exports/mianwali_roads_only_preview.svg",
+  "bounds_wgs84": {
+    "west": 70.90,
+    "south": 31.80,
+    "east": 72.90,
+    "north": 33.00
+  },
+  "included_highway_values": [
+    "motorway", "motorway_link",
+    "trunk", "trunk_link",
+    "primary", "primary_link",
+    "secondary", "secondary_link",
+    "tertiary", "tertiary_link",
+    "unclassified"
+  ],
+  "minimum_way_length_m": {
+    "motorway": 25,
+    "motorway_link": 25,
+    "trunk": 25,
+    "trunk_link": 25,
+    "primary": 25,
+    "primary_link": 25,
+    "secondary": 25,
+    "secondary_link": 25,
+    "tertiary": 50,
+    "tertiary_link": 25,
+    "unclassified": 250
+  },
+  "notes": [
+    "The bounding box is a broad initial extraction window covering Mianwali urban roads and the requested regional corridors toward Harnoli/Essa Khel, Chashma/Kundian and Sargodha.",
+    "This is a rectangular extraction window, not a verified road route. Inspect the preview and tighten the bounds after checking the extracted network.",
+    "Residential streets, service roads, tracks, footways, paths and cycleways are intentionally excluded."
+  ]
+}
