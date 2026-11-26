@@ -18,8 +18,9 @@ jobs:
         run: |
           sudo apt-get update
           sudo apt-get install -y osmium-tool blender
-          python -m pip install --upgrade pip
-          python -m pip install osmium
+          python3 -m venv .venv
+          .venv/bin/pip install --upgrade pip
+          .venv/bin/pip install osmium
 
       - name: Download Pakistan OpenStreetMap extract
         run: |
@@ -29,10 +30,10 @@ jobs:
             -o data/pakistan-261125.osm.pbf
 
       - name: Extract selected roads
-        run: python scripts/extract_roads.py
+        run: .venv/bin/python scripts/extract_roads.py
 
       - name: Render 2D road preview
-        run: python scripts/render_roads_preview.py
+        run: .venv/bin/python scripts/render_roads_preview.py
 
       - name: Build Blender road scene
         run: blender --background --python scripts/import_roads_to_blender.py
