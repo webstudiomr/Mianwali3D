@@ -1,0 +1,7 @@
+data/*.osm.pbf
+*.osm.pbf
+osmium-tool-1.19.0/
+__pycache__/
+*.pyc
+*.blend1
+.vscode/
