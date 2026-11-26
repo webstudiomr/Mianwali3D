@@ -4,7 +4,7 @@ on:
   workflow_dispatch:
 
 permissions:
-  contents: read
+  contents: write
 
 jobs:
   build-road-map:
@@ -37,6 +37,14 @@ jobs:
 
       - name: Build Blender road scene
         run: blender --background --python scripts/import_roads_to_blender.py
+
+      - name: Commit generated map assets to main
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add data/mianwali_roads_only.geojson exports/mianwali_roads_only_preview.svg blender/mianwali_roads_only.blend
+          git commit -m "Generate Mianwali roads-only map assets" || echo "No asset changes to commit"
+          git push
 
       - name: Package map assets
         run: |
