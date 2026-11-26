@@ -1,7 +1,7 @@
-"""Import data/mianwali_roads_only.geojson into Blender as road curves.
+"""Import the roads-only GeoJSON into Blender and save a .blend asset.
 
-Run inside Blender's Scripting workspace. The script uses Blender's bundled Python
-and needs no third-party packages. Roads are centered around the extracted area.
+Run from Blender's Scripting workspace or with:
+  blender --background --python scripts/import_roads_to_blender.py
 """
 import bpy
 import json
@@ -10,6 +10,7 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
 GEOJSON = ROOT / "data" / "mianwali_roads_only.geojson"
+OUTPUT_BLEND = ROOT / "blender" / "mianwali_roads_only.blend"
 COLLECTION_NAME = "Mianwali Roads Only"
 
 WIDTHS = {
@@ -27,10 +28,7 @@ def main():
         raise RuntimeError("GeoJSON missing. Run scripts/extract_roads.py first.")
 
     data = json.loads(GEOJSON.read_text(encoding="utf-8"))
-    coords_all = [
-        c for f in data["features"]
-        for c in f["geometry"]["coordinates"]
-    ]
+    coords_all = [c for f in data["features"] for c in f["geometry"]["coordinates"]]
     if not coords_all:
         raise RuntimeError("GeoJSON contains no road coordinates.")
 
@@ -53,9 +51,8 @@ def main():
         if len(coords) < 2:
             continue
 
-        curve = bpy.data.curves.new(
-            f'OSM way {props.get("osm_id", "unknown")} - {kind}', "CURVE"
-        )
+        osm_id = props.get("osm_id", "unknown")
+        curve = bpy.data.curves.new(f"OSM way {osm_id} - {kind}", "CURVE")
         curve.dimensions = "3D"
         curve.resolution_u = 1
         curve.bevel_depth = WIDTHS.get(kind, 3.5) / 2
@@ -70,12 +67,15 @@ def main():
 
         obj = bpy.data.objects.new(curve.name, curve)
         collection.objects.link(obj)
-        obj["osm_id"] = props.get("osm_id")
+        obj["osm_id"] = osm_id
         obj["highway"] = kind
         if props.get("name"):
             obj["road_name"] = props["name"]
 
-    print(f"Imported {len(collection.objects)} road curves into '{COLLECTION_NAME}'.")
+    OUTPUT_BLEND.parent.mkdir(parents=True, exist_ok=True)
+    bpy.ops.wm.save_as_mainfile(filepath=str(OUTPUT_BLEND))
+    print(f"Imported {len(collection.objects)} road curves.")
+    print(f"Saved Blender asset: {OUTPUT_BLEND}")
 
 
 main()
